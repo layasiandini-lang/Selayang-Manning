@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Villa Selayang — Manning Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{
+  --cream:#FAF7F2;--warm-white:#FFFDF9;--sand:#E8E0D5;--stone:#C4B9AB;
+  --bark:#8B7355;--earth:#5C4A32;--forest:#3D6B58;--forest-light:#4D7D6A;
+  --gold:#B8945A;--text-primary:#1A1410;--text-secondary:#6B5E4E;--text-muted:#9E8E7E;
+  --border:rgba(139,115,85,0.15);--border-strong:rgba(139,115,85,0.3);
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-primary);min-height:100vh;font-size:14px}
+.topbar{background:var(--warm-white);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{font-family:'DM Serif Display',serif;font-size:17px}
+.brand-sub{font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+.week-nav{display:flex;align-items:center;gap:8px}
+.week-label{font-size:13px;font-weight:500;min-width:220px;text-align:center}
+.nav-btn{background:none;border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:5px 12px;cursor:pointer;color:var(--text-secondary);font-size:14px;font-family:'DM Sans',sans-serif}
+.nav-btn:hover{background:var(--sand)}
+.main-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--warm-white);padding:0 24px}
+.main-tab{padding:10px 18px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--text-muted);border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:6px}
+.main-tab.active{color:var(--forest);border-bottom-color:var(--forest);font-weight:500}
+.main-pane{display:none;padding:24px}.main-pane.active{display:block}
+
+/* OKUPANSI */
+.block-section{background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.block-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.block-sub{font-size:12px;color:var(--text-muted);margin-bottom:14px}
+.occ-scroll{overflow-x:auto}
+.occ-table{border-collapse:collapse;min-width:800px;width:100%}
+.occ-table th{background:var(--forest);color:#fff;padding:8px 10px;font-size:11px;font-weight:500;text-align:center;white-space:nowrap}
+.occ-table th:first-child{text-align:left;min-width:100px}
+.occ-table td{padding:6px 8px;border-bottom:0.5px solid var(--border);text-align:center;vertical-align:middle}
+.occ-table td:first-child{text-align:left;font-size:12px;color:var(--text-secondary)}
+.occ-table tr:last-child td{border-bottom:none;background:rgba(61,107,88,0.05);font-weight:500;font-size:11px}
+.occ-input{width:44px;padding:4px;border:1px solid var(--border-strong);border-radius:4px;font-size:12px;text-align:center;background:var(--cream);font-family:'DM Sans',sans-serif;outline:none}
+.occ-input:focus{border-color:var(--forest)}
+.occ-checkbox{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--text-muted);cursor:pointer}
+.result-cell{font-size:11px;color:var(--forest);font-weight:600;line-height:1.5}
+
+/* MANNING */
+.manning-block-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.manning-tab{padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.manning-tab.active{color:var(--forest);border-bottom-color:var(--forest);font-weight:500}
+.manning-pane{display:none}.manning-pane.active{display:block}
+.grid-wrap{overflow-x:auto;margin-bottom:20px}
+table.mtable{width:100%;border-collapse:collapse;min-width:900px}
+table.mtable thead th{background:var(--forest);color:#fff;padding:10px 6px;font-size:11px;font-weight:500;text-align:center;white-space:nowrap}
+table.mtable thead th:first-child{text-align:left;padding-left:12px;min-width:110px}
+table.mtable thead th:nth-child(2){min-width:50px}
+.day-th{font-size:11px}.day-th-date{font-size:10px;opacity:0.7;display:block}
+table.mtable tbody tr.role-hdr td{background:var(--sand);font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;padding:6px 12px}
+table.mtable tbody td{padding:5px 4px;border-bottom:0.5px solid var(--border);text-align:center;vertical-align:middle}
+table.mtable tbody td:first-child{text-align:left;padding-left:12px;font-size:12px;font-weight:500}
+table.mtable tbody td:nth-child(2){font-size:11px;color:var(--text-muted)}
+.shift-select{width:100%;padding:4px 2px;border:1px solid var(--border-strong);border-radius:4px;font-size:10px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-primary);outline:none;cursor:pointer}
+.shift-select.has-val{background:#E1F5EE;color:#085041;border-color:#5DCAA5;font-weight:500}
+.shift-select.dayoff{background:#FFEBEE;color:#C62828;border-color:#EF9A9A}
+
+/* COUNTER */
+.counter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.counter-block{background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.counter-block-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.counter-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px}
+.counter-row:last-child{border-bottom:none}
+.counter-name{color:var(--text-primary);font-weight:500}
+.counter-val strong{font-size:16px;color:var(--forest);font-family:'DM Serif Display',serif}
+.counter-val span{font-size:10px;color:var(--text-muted);display:block;text-align:right}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border:none}
+.btn-primary{background:var(--forest);color:#fff}.btn-primary:hover{background:var(--forest-light)}
+.btn-outline{background:none;border:1px solid var(--border-strong);color:var(--text-secondary)}.btn-outline:hover{background:var(--sand)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--forest);color:#fff;padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all 0.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="topbar">
+  <div><div class="brand">Villa Selayang</div><div class="brand-sub">Manning Schedule</div></div>
+  <div class="week-nav">
+    <button class="nav-btn" onclick="changeWeek(-1)">&#8249;</button>
+    <div class="week-label" id="week-label"></div>
+    <button class="nav-btn" onclick="changeWeek(1)">&#8250;</button>
+  </div>
+</div>
+
+<div class="main-tabs">
+  <button class="main-tab active" onclick="switchMain('okupansi')" id="mtab-okupansi"><i class="ti ti-home"></i> Input Okupansi</button>
+  <button class="main-tab" onclick="switchMain('manning')" id="mtab-manning"><i class="ti ti-calendar"></i> Manning Schedule</button>
+  <button class="main-tab" onclick="switchMain('counter')" id="mtab-counter"><i class="ti ti-chart-bar"></i> Counter Hari Kerja</button>
+</div>
+
+<!-- OKUPANSI -->
+<div class="main-pane active" id="mpane-okupansi">
+  <div class="block-section">
+    <div class="block-title">Block 1 — SLOH, SLOR, TBM, TGO</div>
+    <div class="block-sub">Total 7 kamar · SLOH(3) SLOR(2) TBM(1) TGO(1)</div>
+    <div class="occ-scroll"><table class="occ-table" id="occ-b1"></table></div>
+  </div>
+  <div class="block-section">
+    <div class="block-title">Block 2 — SLEN</div>
+    <div class="block-sub">Total 5 kamar · SLEN S(3) SLEN M(2)</div>
+    <div class="occ-scroll"><table class="occ-table" id="occ-b2"></table></div>
+  </div>
+  <div class="block-section">
+    <div class="block-title">TAR — Theolive Arrea</div>
+    <div class="block-sub">1 unit · HK masuk jika ada B2B</div>
+    <div class="occ-scroll"><table class="occ-table" id="occ-tar"></table></div>
+  </div>
+  <div class="block-section">
+    <div class="block-title">SLCP — Selacamp</div>
+    <div class="block-sub">10 unit · Input stay, checkout & B2B</div>
+    <div class="occ-scroll"><table class="occ-table" id="occ-slcp"></table></div>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:8px">
+    <button class="btn btn-primary" onclick="saveOkupansi();switchMain('manning')"><i class="ti ti-check"></i> Simpan & lihat manning</button>
+    <button class="btn btn-outline" onclick="saveOkupansi()"><i class="ti ti-device-floppy"></i> Simpan</button>
+  </div>
+</div>
+
+<!-- MANNING -->
+<div class="main-pane" id="mpane-manning">
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn btn-outline" onclick="switchMain('okupansi')"><i class="ti ti-arrow-left"></i> Edit okupansi</button>
+    <button class="btn btn-primary" onclick="saveManning()"><i class="ti ti-device-floppy"></i> Simpan jadwal</button>
+    <button class="btn" style="background:var(--gold);color:#fff" onclick="openGenerateModal()"><i class="ti ti-file-text"></i> Generate manning</button>
+  </div>
+  <div class="manning-block-tabs">
+    <button class="manning-tab active" onclick="switchManning('b1')" id="mtab-b1">Block 1</button>
+    <button class="manning-tab" onclick="switchManning('b2')" id="mtab-b2">Block 2</button>
+    <button class="manning-tab" onclick="switchManning('tar')" id="mtab-tar">TAR</button>
+    <button class="manning-tab" onclick="switchManning('slcp')" id="mtab-slcp">SLCP</button>
+  </div>
+  <div class="manning-pane active" id="mpane-b1"><div class="grid-wrap"><table class="mtable" id="table-b1"></table></div></div>
+  <div class="manning-pane" id="mpane-b2"><div class="grid-wrap"><table class="mtable" id="table-b2"></table></div></div>
+  <div class="manning-pane" id="mpane-tar"><div class="grid-wrap"><table class="mtable" id="table-tar"></table></div></div>
+  <div class="manning-pane" id="mpane-slcp"><div class="grid-wrap"><table class="mtable" id="table-slcp"></table></div></div>
+</div>
+
+<!-- COUNTER -->
+<div class="main-pane" id="mpane-counter">
+  <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Jumlah hari kerja minggu ini (Selasa – Senin)</div>
+  <div class="counter-grid" id="counter-grid"></div>
+</div>
+
+<script>
+const MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const DAYS=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const LS='selayang_manning_v3';
+let weekOffset=0;
+
+// Get Tue-Mon week dates
+function getWeekDates(){
+  const now=new Date();
+  // Find next Tuesday from today (or this Tuesday if today is Mon)
+  const day=now.getDay(); // 0=Sun,1=Mon,...
+  // Manning week: Tue to Mon
+  // Base: find most recent Tuesday
+  let diff=day-2; // days since last Tuesday
+  if(diff<0) diff+=7;
+  const tue=new Date(now);
+  tue.setDate(now.getDate()-diff+(weekOffset*7));
+  tue.setHours(0,0,0,0);
+  return Array.from({length:7},(_,i)=>{const d=new Date(tue);d.setDate(tue.getDate()+i);return d;});
+}
+
+function weekKey(){return getWeekDates()[0].toISOString().slice(0,10);}
+
+function updateWeekLabel(){
+  const d=getWeekDates();
+  const tue=d[0],mon=d[6];
+  document.getElementById('week-label').textContent=
+    'Sel '+tue.getDate()+'/'+( tue.getMonth()+1)+' – Sen '+mon.getDate()+'/'+(mon.getMonth()+1)+'/'+mon.getFullYear();
+}
+
+function changeWeek(dir){weekOffset+=dir;updateWeekLabel();renderOkupansi();renderAllManning();renderCounter();}
+
+// STORAGE
+function getData(){try{return JSON.parse(localStorage.getItem(LS))||{};}catch(e){return {};}}
+function setData(d){localStorage.setItem(LS,JSON.stringify(d));}
+
+function getOccVal(block,ds,unit,type){
+  const d=getData();
+  return(d.occ||{})[weekKey()]?.[block]?.[ds]?.[unit+'_'+type]||0;
+}
+function getShift(block,emp,ds){
+  const d=getData();
+  return(d.shifts||{})[weekKey()]?.[block]?.[ds]?.[emp]||'';
+}
+
+// RULES
+const UNITS={
+  b1:[{name:'SLOH',max:3},{name:'SLOR',max:2},{name:'TBM',max:1},{name:'TGO',max:1}],
+  b2:[{name:'SLEN S',max:3},{name:'SLEN M',max:2}],
+  tar:[{name:'TAR',max:1}],
+  slcp:[{name:'SLCP',max:10}],
+};
+
+function calcHK(block, stayTotal, coTotal, b2bTotal){
+  if(block==='b1'){
+    const stayHK=[0,0,0,1,1,2,3,3][Math.min(stayTotal,7)];
+    const coHK=coTotal===0?0:coTotal<=3?1:2;
+    const b2bHK=b2bTotal===0?0:b2bTotal<=3?0:b2bTotal<=5?2:3;
+    return Math.min(stayHK+coHK+b2bHK,3);
+  }
+  if(block==='b2'){
+    const stayHK=[0,0,0,1,2,2][Math.min(stayTotal,5)];
+    const coHK=coTotal===0?0:coTotal<=3?1:2;
+    const b2bHK=b2bTotal===0?0:b2bTotal<=2?0:b2bTotal<=4?1:2;
+    return Math.min(stayHK+coHK+b2bHK,2);
+  }
+  return 0;
+}
+
+function calcFOFB(block, stayTotal){
+  if(block==='b1'){
+    return [2,2,2,2,2,3,3,3][Math.min(stayTotal,7)];
+  }
+  return 0;
+}
+
+function getNeeded(block, ds){
+  const units=UNITS[block]||[];
+  let stay=0,co=0,b2b=0;
+  units.forEach(u=>{
+    stay+=parseInt(getOccVal(block,ds,u.name,'stay'))||0;
+    co+=parseInt(getOccVal(block,ds,u.name,'co'))||0;
+    b2b+=parseInt(getOccVal(block,ds,u.name,'b2b'))||0;
+  });
+  if(block==='tar'){
+    const tarB2B=getOccVal(block,ds,'TAR','b2b');
+    return {hk:tarB2B?1:0};
+  }
+  if(block==='slcp'){
+    const hk=calcHK('b1',stay,co,b2b);
+    return {hk,note:'+ Casual jika perlu'};
+  }
+  const hk=calcHK(block,stay,co,b2b);
+  const fofb=block==='b1'?calcFOFB(block,stay):null;
+  return {hk,fofb};
+}
+
+// RENDER OKUPANSI
+function renderOkupansi(){
+  const dates=getWeekDates();
+  ['b1','b2','tar','slcp'].forEach(block=>{
+    const table=document.getElementById('occ-'+block);
+    const units=UNITS[block];
+
+    // Header
+    let html='<thead><tr><th>Unit</th>';
+    dates.forEach(d=>{html+=`<th>${DAYS[d.getDay()]}<br><span style="font-size:10px;opacity:0.8">${d.getDate()}/${d.getMonth()+1}</span></th>`;});
+    html+='</tr></thead><tbody>';
+
+    if(block==='tar'){
+      ['Terisi','B2B'].forEach(type=>{
+        const key=type==='Terisi'?'stay':'b2b';
+        html+=`<tr><td>${type}</td>`;
+        dates.forEach(d=>{
+          const ds=d.toISOString().slice(0,10);
+          const val=getOccVal(block,ds,'TAR',key);
+          html+=`<td><input type="checkbox" id="occ_${block}_${ds}_TAR_${key}" ${val?'checked':''} onchange="recalcResult('${block}','${ds}')"></td>`;
+        });
+        html+='</tr>';
+      });
+    } else {
+      // Block 1, 2 & SLCP: Stay, Checkout, B2B per unit
+      ['stay','co','b2b'].forEach(type=>{
+        const typeLabel={stay:'Stay',co:'Checkout',b2b:'B2B'}[type];
+        html+=`<tr><td style="font-weight:500;color:var(--text-primary)">${typeLabel}</td>`;
+        dates.forEach(d=>{html+=`<td></td>`;});
+        html+='</tr>';
+        units.forEach(u=>{
+          html+=`<tr><td style="padding-left:16px">${u.name} <span style="color:var(--text-muted);font-size:10px">/${u.max}</span></td>`;
+          dates.forEach(d=>{
+            const ds=d.toISOString().slice(0,10);
+            const val=getOccVal(block,ds,u.name,type)||0;
+            html+=`<td><input type="number" class="occ-input" id="occ_${block}_${ds}_${u.name.replace(/\s/g,'_')}_${type}" min="0" max="${u.max}" value="${val}" oninput="recalcResult('${block}','${ds}')"></td>`;
+          });
+          html+='</tr>';
+        });
+      });
+    }
+
+    // Result row
+    html+=`<tr><td style="font-weight:600;color:var(--forest)">Kebutuhan</td>`;
+    dates.forEach(d=>{
+      const ds=d.toISOString().slice(0,10);
+      const n=getNeeded(block,ds);
+      html+=`<td class="result-cell" id="res_${block}_${ds}">${formatNeeded(block,n)}</td>`;
+    });
+    html+='</tr>';
+    html+='</tbody>';
+    table.innerHTML=html;
+  });
+}
+
+function recalcResult(block,ds){
+  // Gather fresh values
+  const units=UNITS[block]||[];
+  let stay=0,co=0,b2b=0;
+  if(block==='tar'){
+    const bEl=document.getElementById(`occ_${block}_${ds}_TAR_b2b`);
+    b2b=bEl&&bEl.checked?1:0;
+  } else {
+    units.forEach(u=>{
+      const ukey=u.name.replace(/\s/g,'_');
+      const sEl=document.getElementById(`occ_${block}_${ds}_${ukey}_stay`);
+      const cEl=document.getElementById(`occ_${block}_${ds}_${ukey}_co`);
+      const bEl=document.getElementById(`occ_${block}_${ds}_${ukey}_b2b`);
+      stay+=sEl?parseInt(sEl.value)||0:0;
+      co+=cEl?parseInt(cEl.value)||0:0;
+      b2b+=bEl?parseInt(bEl.value)||0:0;
+    });
+  }
+  let n;
+  if(block==='tar') n={hk:b2b?1:0};
+  else n={hk:calcHK(block==='slcp'?'b1':block,stay,co,b2b),fofb:block==='b1'?calcFOFB(block,stay):null};
+  const el=document.getElementById(`res_${block}_${ds}`);
+  if(el) el.innerHTML=formatNeeded(block,n);
+}
+
+function formatNeeded(block,n){
+  if(block==='b1') return `HK: ${n.hk}<br>FOFB: ${n.fofb}`;
+  if(block==='b2') return `HK/FO: ${n.hk}`;
+  if(block==='tar') return `HK: ${n.hk===1?'Masuk':'Libur'}`;
+  if(block==='slcp') return `HK: ${n.hk}`;
+  return '';
+}
+
+function saveOkupansi(){
+  const d=getData();
+  if(!d.occ) d.occ={};
+  if(!d.occ[weekKey()]) d.occ[weekKey()]={};
+  const dates=getWeekDates();
+  ['b1','b2','tar','slcp'].forEach(block=>{
+    if(!d.occ[weekKey()][block]) d.occ[weekKey()][block]={};
+    const units=UNITS[block];
+    dates.forEach(date=>{
+      const ds=date.toISOString().slice(0,10);
+      d.occ[weekKey()][block][ds]={};
+      if(block==='tar'){
+        ['stay','b2b'].forEach(type=>{
+          const el=document.getElementById(`occ_${block}_${ds}_TAR_${type}`);
+          d.occ[weekKey()][block][ds][`TAR_${type}`]=el?el.checked?1:0:0;
+        });
+      } else {
+        units.forEach(u=>{
+          ['stay','co','b2b'].forEach(type=>{
+            const el=document.getElementById(`occ_${block}_${ds}_${u.name.replace(/\s/g,'_')}_${type}`);
+            d.occ[weekKey()][block][ds][`${u.name}_${type}`]=el?parseInt(el.value)||0:0;
+          });
+        });
+      }
+    });
+  });
+  setData(d);showToast('Okupansi tersimpan!');
+}
+
+// EMPLOYEES & SHIFTS
+const EMPLOYEES={
+  b1:{
+    'DW HK':['Elah','Yanti','Aisyah','Casual'],
+    'DW FOFB':['Sinta','Tika','Bunga'],
+    'PIC':['Edi','Daud'],
+    'SPV':['Wahyu'],
+    'GRD':['Bodon'],
+    'SCR':['Panda'],
+  },
+  b2:{
+    'DW HKFOFB':['Ratna','Pipit'],
+    'PIC':['Rusdi'],
+    'SPV':['Denih'],
+    'Cook':['Deden'],
+    'GRD & SCR':['Dodi'],
+  },
+  tar:{'DW HK':['Revo'],'PIC':['Rio']},
+  slcp:{'DW HKFO':['Jordi','Casual'],'PIC':['Fadli'],'GRD & SCR':['Aden'],'SPV':['Wahyu']},
+};
+
+const SHIFTS={
+  b1:{
+    'DW HK':['—','Masuk (08:00-16:00)','Halfday Pagi (10:00-14:00)','Halfday Siang (12:00-16:00)','Day Off'],
+    'DW FOFB':['—','FO Pagi (06:00-16:00)','FO Siang (11:00-20:30)','Shift 3 (11:00-21:00)','Day Off'],
+    'PIC':['—','Shift 1 (06:00-16:00)','Shift 2 (10:00-20:00)','Shift 3 (11:00-21:00)','Day Off'],
+    'SPV':['—','SPV Siang (10:00-20:00)','Day Off'],
+    'GRD':['—','Garden (06:00-16:00)','Day Off'],
+    'SCR':['—','Security (21:00-06:00)','Day Off'],
+  },
+  b2:{
+    'DW HKFOFB':['—','HK Pagi (08:00-16:00)','HK Halfday Pagi (10:00-14:00)','HK Halfday Siang (12:00-16:00)','Day Off'],
+    'PIC':['—','Shift 1 (06:00-16:00)','Shift 2 (10:00-20:00)','Shift 3 (11:00-21:00)','Day Off'],
+    'SPV':['—','Shift 1 (06:00-16:00)','Shift 2 (10:00-20:00)','Shift 3 (11:00-21:00)','Day Off'],
+    'Cook':['—','Cook (12:00-22:00)','Day Off'],
+    'GRD & SCR':['—','Garden Siang (13:00-17:00)','Security (21:00-06:00)','Day Off'],
+  },
+  tar:{
+    'DW HK':['—','Masuk (08:00-16:00)','Halfday Pagi (10:00-14:00)','Day Off'],
+    'PIC':['—','Shift 1 (06:00-16:00)','Shift 2 (10:00-20:00)','Shift 3 (11:00-21:00)','Day Off'],
+  },
+  slcp:{
+    'DW HKFO':['—','FO Pagi (06:00-16:00)','FO Siang (11:00-20:30)','Shift 3 (11:00-21:00)','Day Off'],
+    'PIC':['—','Shift 1 (06:00-16:00)','Shift 2 (10:00-20:00)','Shift 3 (11:00-21:00)','Day Off'],
+    'GRD & SCR':['—','Security (21:00-06:00)','Day Off'],
+    'SPV':['—','SPV Siang (10:00-20:00)','Day Off'],
+  },
+};
+
+function renderManningTable(block){
+  const dates=getWeekDates();
+  const table=document.getElementById('table-'+block);
+  const emps=EMPLOYEES[block];
+  const blockShifts=SHIFTS[block];
+
+  let html='<thead><tr><th>Karyawan</th><th>Total</th>';
+  dates.forEach(d=>{
+    const ds=d.toISOString().slice(0,10);
+    const n=getNeeded(block,ds);
+    const needTxt=block==='b1'?`HK:${n.hk} FO:${n.fofb}`:block==='b2'?`HK:${n.hk}`:block==='tar'?`HK:${n.hk}`:`✓`;
+    html+=`<th><div class="day-th">${DAYS[d.getDay()]}<span class="day-th-date">${d.getDate()}/${d.getMonth()+1}</span></div><div style="font-size:9px;opacity:0.75;margin-top:2px">${needTxt}</div></th>`;
+  });
+  html+='</tr></thead><tbody>';
+
+  Object.entries(emps).forEach(([role,empList])=>{
+    html+=`<tr class="role-hdr"><td colspan="${dates.length+2}">${role}</td></tr>`;
+    empList.forEach(emp=>{
+      let workDays=0;
+      dates.forEach(d=>{
+        const v=getShift(block,emp,d.toISOString().slice(0,10));
+        if(v&&v!=='—'&&!v.includes('Day Off')) workDays++;
+      });
+      const isCasual=emp==='Casual';
+      const isShared=emp==='Wahyu';
+      html+=`<tr${isCasual?' style="background:rgba(184,148,90,0.06)"':''}><td>${isCasual?'<span style="font-size:11px;color:var(--gold);font-weight:600;font-style:italic">+ Casual</span>':emp}${isShared&&block==='b1'?'<span style="font-size:9px;color:var(--text-muted);display:block">+SLCP</span>':isShared&&block==='slcp'?'<span style="font-size:9px;color:var(--text-muted);display:block">+Block1</span>':''}</td>
+        <td><span style="font-size:12px;font-weight:600;color:var(--forest)">${workDays}hr</span></td>`;
+      dates.forEach(d=>{
+        const ds=d.toISOString().slice(0,10);
+        const val=getShift(block,emp,ds);
+        const roleShifts=blockShifts[role]||['—'];
+        const opts=roleShifts.map(s=>`<option value="${s}" ${val===s?'selected':''}>${s}</option>`).join('');
+        const cls=val&&val!=='—'?val.includes('Day Off')?'dayoff':'has-val':'';
+        html+=`<td><select class="shift-select ${cls}" id="shift_${block}_${emp}_${ds}" onchange="onShiftChange(this,'${block}','${emp}','${ds}')">${opts}</select></td>`;
+      });
+      html+='</tr>';
+    });
+  });
+  html+='</tbody>';
+  table.innerHTML=html;
+}
+
+function onShiftChange(sel,block,emp,ds){
+  const val=sel.value;
+  sel.className='shift-select '+(val&&val!=='—'?val.includes('Day Off')?'dayoff':'has-val':'');
+  const d=getData();
+  if(!d.shifts)d.shifts={};
+  if(!d.shifts[weekKey()])d.shifts[weekKey()]={};
+  if(!d.shifts[weekKey()][block])d.shifts[weekKey()][block]={};
+  if(!d.shifts[weekKey()][block][ds])d.shifts[weekKey()][block][ds]={};
+  d.shifts[weekKey()][block][ds][emp]=val;
+  setData(d);
+  renderManningTable(block);
+  renderCounter();
+}
+
+function saveManning(){
+  const d=getData();
+  if(!d.shifts)d.shifts={};
+  if(!d.shifts[weekKey()])d.shifts[weekKey()]={};
+  const dates=getWeekDates();
+  ['b1','b2','tar','slcp'].forEach(block=>{
+    if(!d.shifts[weekKey()][block])d.shifts[weekKey()][block]={};
+    dates.forEach(date=>{
+      const ds=date.toISOString().slice(0,10);
+      if(!d.shifts[weekKey()][block][ds])d.shifts[weekKey()][block][ds]={};
+      Object.entries(EMPLOYEES[block]).forEach(([role,emps])=>{
+        emps.forEach(emp=>{
+          const sel=document.getElementById(`shift_${block}_${emp}_${ds}`);
+          if(sel) d.shifts[weekKey()][block][ds][emp]=sel.value;
+        });
+      });
+    });
+  });
+  setData(d);showToast('Jadwal tersimpan!');renderCounter();
+}
+
+function renderCounter(){
+  const dates=getWeekDates();
+  const grid=document.getElementById('counter-grid');
+  const blockLabels={b1:'Block 1',b2:'Block 2',tar:'TAR',slcp:'SLCP'};
+  let html='';
+  ['b1','b2','tar','slcp'].forEach(block=>{
+    html+=`<div class="counter-block"><div class="counter-block-title">${blockLabels[block]}</div>`;
+    Object.entries(EMPLOYEES[block]).forEach(([role,emps])=>{
+      emps.forEach(emp=>{
+        let week=0;
+        dates.forEach(d=>{
+          const v=getShift(block,emp,d.toISOString().slice(0,10));
+          if(v&&v!=='—'&&!v.includes('Day Off')) week++;
+        });
+        html+=`<div class="counter-row">
+          <span class="counter-name">${emp}<span style="font-size:10px;color:var(--text-muted);display:block">${role}</span></span>
+          <div class="counter-val"><strong>${week}</strong><span>hari</span></div>
+        </div>`;
+      });
+    });
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+
+function switchMain(name){
+  document.querySelectorAll('.main-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('mpane-'+name).classList.add('active');
+  document.getElementById('mtab-'+name).classList.add('active');
+  if(name==='manning') renderAllManning();
+  if(name==='counter') renderCounter();
+}
+
+function switchManning(block){
+  document.querySelectorAll('.manning-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.manning-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mtab-'+block).classList.add('active');
+  document.getElementById('mpane-'+block).classList.add('active');
+  renderManningTable(block);
+}
+
+function renderAllManning(){['b1','b2','tar','slcp'].forEach(b=>renderManningTable(b));}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+updateWeekLabel();
+renderOkupansi();
+renderAllManning();
+renderCounter();
+</script>
+
+<!-- GENERATE MODAL -->
+<div id="gen-modal" onclick="closeGenModal(event)" style="display:none;position:fixed;inset:0;background:rgba(26,20,16,0.55);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFDF9;border-radius:12px;padding:24px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-family:'DM Serif Display',serif;font-size:18px">Generate Manning</div>
+      <button onclick="document.getElementById('gen-modal').style.display='none'" style="background:none;border:none;cursor:pointer;color:#9E8E7E;font-size:18px"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="font-size:12px;color:#9E8E7E;margin-bottom:14px" id="gen-subtitle"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+      <button onclick="selectGenBlock('b1')" id="genbtn-b1" style="padding:6px 14px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(139,115,85,0.3);background:#3D6B58;color:#fff">Block 1</button>
+      <button onclick="selectGenBlock('b2')" id="genbtn-b2" style="padding:6px 14px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(139,115,85,0.3);background:#FAF7F2;color:#6B5E4E">Block 2</button>
+      <button onclick="selectGenBlock('tar')" id="genbtn-tar" style="padding:6px 14px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(139,115,85,0.3);background:#FAF7F2;color:#6B5E4E">TAR</button>
+      <button onclick="selectGenBlock('slcp')" id="genbtn-slcp" style="padding:6px 14px;border-radius:20px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(139,115,85,0.3);background:#FAF7F2;color:#6B5E4E">SLCP</button>
+    </div>
+    <div id="gen-content" style="background:#FAF7F2;border-radius:8px;padding:16px;font-size:12.5px;line-height:1.8;color:#1A1410;white-space:pre-wrap;font-family:'DM Sans',sans-serif;min-height:180px"></div>
+    <div style="font-size:11px;color:#9E8E7E;font-style:italic;margin-top:8px">Screenshot untuk diposting ke grup karyawan</div>
+    <div style="margin-top:10px">
+      <button onclick="copyGenContent()" id="copy-gen-btn" style="background:#3D6B58;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-copy"></i> Copy teks</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS2=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const blockLabels={b1:'BLOCK 1 (SLOH, SLOR, TBM, TGO)',b2:'BLOCK 2 (SLEN)',tar:'TAR (Theolive Arrea)',slcp:'SLCP (Selacamp)'};
+
+function openGenerateModal(){
+  document.getElementById('gen-modal').style.display='flex';
+  const d=getWeekDates();
+  document.getElementById('gen-subtitle').textContent='Jadwal '+d[0].getDate()+' '+MONTHS2[d[0].getMonth()]+' – '+d[6].getDate()+' '+MONTHS2[d[6].getMonth()]+' '+d[6].getFullYear();
+  selectGenBlock('b1');
+}
+
+function closeGenModal(e){if(e.target===document.getElementById('gen-modal'))document.getElementById('gen-modal').style.display='none';}
+
+function selectGenBlock(block){
+  ['b1','b2','tar','slcp'].forEach(b=>{
+    const btn=document.getElementById('genbtn-'+b);
+    if(b===block){btn.style.background='#3D6B58';btn.style.color='#fff';}
+    else{btn.style.background='#FAF7F2';btn.style.color='#6B5E4E';}
+  });
+  renderGenContent(block);
+}
+
+function renderGenContent(block){
+  const dates=getWeekDates();
+  const emps=EMPLOYEES[block];
+  let txt='';
+  txt+='📋 JADWAL MANNING\n';
+  txt+=blockLabels[block]+'\n';
+  txt+='━━━━━━━━━━━━━━━━━━━━\n';
+  txt+=dates[0].getDate()+' '+MONTHS2[dates[0].getMonth()]+' – '+dates[6].getDate()+' '+MONTHS2[dates[6].getMonth()]+' '+dates[6].getFullYear()+'\n';
+  txt+='━━━━━━━━━━━━━━━━━━━━\n\n';
+
+  const totalPerDay={};
+  dates.forEach(d=>{totalPerDay[d.toISOString().slice(0,10)]=0;});
+
+  dates.forEach(d=>{
+    const ds=d.toISOString().slice(0,10);
+    const dayLabel=DAYS[d.getDay()]+', '+d.getDate()+'/'+(d.getMonth()+1);
+    const working=[];
+    Object.entries(emps).forEach(([role,empList])=>{
+      empList.forEach(emp=>{
+        const v=getShift(block,emp,ds);
+        if(v&&v!=='—'&&!v.includes('Day Off')){
+          working.push({name:emp==='Casual'?'Casual':emp,shift:v});
+          totalPerDay[ds]++;
+        }
+      });
+    });
+    txt+='📅 '+dayLabel+'\n';
+    if(!working.length){txt+='   (tidak ada karyawan masuk)\n';}
+    else{working.forEach(w=>{txt+='   • '+w.name+' — '+w.shift+'\n';});}
+    txt+='\n';
+  });
+
+  txt+='━━━━━━━━━━━━━━━━━━━━\n';
+  txt+='TOTAL MASUK PER HARI\n';
+  dates.forEach(d=>{
+    const ds=d.toISOString().slice(0,10);
+    txt+=DAYS[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+': '+totalPerDay[ds]+' orang\n';
+  });
+
+  document.getElementById('gen-content').textContent=txt;
+}
+
+function copyGenContent(){
+  const txt=document.getElementById('gen-content').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.getElementById('copy-gen-btn');
+    btn.innerHTML='<i class="ti ti-check"></i> Tersalin!';
+    setTimeout(()=>btn.innerHTML='<i class="ti ti-copy"></i> Copy teks',2000);
+  });
+}
+</script>
+</body>
+</html>
